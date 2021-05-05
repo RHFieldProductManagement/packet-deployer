@@ -130,9 +130,12 @@ deploy() {
 case $1 in
   [Tt][Ee][Ss][Tt]) project_id=$(create_project |jq .id |tr -d '"')
         echo $project_id ;;
-  [Dd][Ee][Pp][Ll][Oo][Yy]) deploy ;;
+  [Dd][Ee][Pp][Ll][Oo][Yy])
+        deploy
+        echo "Server IP : $SERVER_IP"
+        echo "Lab instructions : https://github.comRHFieldProductManagement/openshift-virt-labs" ;;
   [Cc][Ll][Ee][Aa][Nn]*) delete_project $2 ;;
-  *) echo "Usage : $0 [ Deploy | Clean ]"
+  *) echo "Usage : $0 [ Deploy | Clean <project_id> ]"
     exit 0 ;;
 esac
 
