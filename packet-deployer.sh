@@ -1,7 +1,7 @@
 #!/bin/bash
 #set -x
 
-SSH_KEY='$(cat ~/.ssh/id_rsa.pub)'
+SSH_KEY=$(cat ~/.ssh/id_rsa.pub)
 
 # Enter your Equinix Metal API Key here
 API_TOKEN=""
