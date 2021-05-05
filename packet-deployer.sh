@@ -7,7 +7,7 @@ SSH_KEY='$(cat ~/.ssh/id_rsa.pub)'
 API_TOKEN=""
 
 # Set project name
-project_name="FPM Lab"
+project_name="FPM-Lab"
 
 # Set termination in 6 hours
 TERMINATION=$(date -d '+6 hours' +%FT%T%Z)
