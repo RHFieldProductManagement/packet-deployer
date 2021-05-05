@@ -116,8 +116,8 @@ deploy() {
   sleep 180
   SERVER_IP=$(get_server_ip $SERVER_ID |jq .ip_addresses[0].address |tr -d '"')
   echo $SERVER_IP
-  echo "SERVER_IP=$SERVER_IP" > ./node3-infos.txt
-  echo "PROJECT_ID=$project_id" >> ./node3-infos.txt
+  echo "SERVER_IP=$SERVER_IP" > ./node-infos.txt
+  echo "PROJECT_ID=$project_id" >> ./node-infos.txt
   prepare_node_setup
   scp -o StrictHostKeyChecking=no node-prep.sh root@$SERVER_IP:/root/
   ssh -o StrictHostKeyChecking=no root@$SERVER_IP sh /root/node-prep.sh
