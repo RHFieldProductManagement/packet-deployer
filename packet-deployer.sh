@@ -85,7 +85,7 @@ prepare_node_setup() {
   dnf -y update
   dnf -y install firewalld git qemu-kvm libvirt jq
   mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/nvme0n1 /dev/nvme1n1
-  mkfs.ext4 -v -L nvmeRAID -m 1 -b 4096 -E stride=128,stripe-width=256 /dev/md0
+  mkfs.ext4 -v -L nvmeRAID /dev/md0
   mount /dev/md0 /var/lib/libvirt/images
   mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
   echo /dev/md0 /var/lib/libvirt/images defaults,nofail,nobootwait 0 2 >> /etc/fstab
