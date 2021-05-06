@@ -17,7 +17,7 @@ PLAN_ONDEMAND="s3.xlarge.x86"
 PLAN_SPOT="m3.large.x86"
 
 # Set your pull secret
-PULLSECRET=''
+PULL_SECRET=''
 
 create_project_with_payment() {
   curl -X POST -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects" \
@@ -90,7 +90,8 @@ prepare_node_setup() {
   mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
   echo /dev/md0 /var/lib/libvirt/images defaults,nofail,nobootwait 0 2 >> /etc/fstab
   git clone --branch packet --single-branch https://github.com/hgeaydem/openshift-virt-labs.git
-  sed -i 's/PULLSECRET/$PULLSECRET/g' openshift-virt-labs/install.sh
+  sed -i 's/^PULL_SECRET.*/PULL_SECRET=\'$PULL_SECRET\'/g' openshift-virt-labs/install.sh
+  sed -i 's/^OCP_VERSION.*/OCP_VERSION=$OCP_VERSION/g' openshift-virt-labs/install.sh
 EOF
 }
 
@@ -133,10 +134,10 @@ case $1 in
   [Dd][Ee][Pp][Ll][Oo][Yy])
         deploy
         echo "Server IP : $SERVER_IP"
-        echo "Lab instructions : https://github.comRHFieldProductManagement/openshift-virt-labs" ;;
+        echo "Lab documentation : https://github.com/RHFieldProductManagement/openshift-virt-labs"
+        echo "Create proxy on localhost:8080 with command : ssh user@$SERVER_IP -L 8080:192.168.123.100:3128"
+        echo "Then setup proxy and connect to lab instructions : https://cnv-workbook.apps.cnv.example.com" ;;
   [Cc][Ll][Ee][Aa][Nn]*) delete_project $2 ;;
   *) echo "Usage : $0 [ Deploy | Clean <project_id> ]"
     exit 0 ;;
 esac
-
-#delete_server $SERVER_ID
