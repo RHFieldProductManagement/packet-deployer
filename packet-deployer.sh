@@ -129,8 +129,6 @@ deploy() {
 
 
 case $1 in
-  [Tt][Ee][Ss][Tt]) project_id=$(create_project |jq .id |tr -d '"')
-        echo $project_id ;;
   [Dd][Ee][Pp][Ll][Oo][Yy])
         deploy
         echo "Server IP : $SERVER_IP"
