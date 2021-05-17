@@ -146,6 +146,15 @@ deploy() {
 
 case $1 in
   [Dd][Ee][Pp][Ll][Oo][Yy])
+        if [ "$API_TOKEN" = "" ]
+        then
+          echo "Please enter your Equinix Metal API Token in the script"
+          exit 0
+        elif [ "$PULL_SECRET" = "" ]
+        then
+          echo "Please enter your pull secret in the script"
+          exit 0
+        fi
         deploy
         echo "Server IP : $SERVER_IP"
         echo "Lab documentation : https://github.com/RHFieldProductManagement/openshift-virt-labs"
