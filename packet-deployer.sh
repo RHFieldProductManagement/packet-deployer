@@ -46,11 +46,6 @@ EOF
   rm -f data.json
 }
 
-delete_project() {
-  project_id=$1
-  curl -X DELETE -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects/$project_id"
-}
-
 create_server_spot() {
   curl -X POST -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects/$project_id/devices" \
   -d '{
@@ -89,8 +84,8 @@ prepare_node_setup() {
   mount /dev/md0 /var/lib/libvirt/images
   mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
   echo /dev/md0 /var/lib/libvirt/images defaults,nofail,nobootwait 0 2 >> /etc/fstab
-  git clone --branch packet --single-branch https://github.com/hgeaydem/openshift-virt-labs.git
-  sed -i 's/^PULL_SECRET.*/PULL_SECRET=\'$PULL_SECRET\'/g' openshift-virt-labs/install.sh
+  git clone https://github.com/RHFieldProductManagement/openshift-virt-labs.git
+  sed -i 's/^PULL_SECRET.*/PULL_SECRET='\''$PULL_SECRET'\''/g' openshift-virt-labs/install.sh
   sed -i 's/^OCP_VERSION.*/OCP_VERSION=$OCP_VERSION/g' openshift-virt-labs/install.sh
 EOF
 }
@@ -102,6 +97,23 @@ delete_server() {
     "force_delete": true
   }'
 }
+
+list_project_servers() {
+  project_id=$1
+  curl -X GET -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects/$project_id/devices"
+}
+
+delete_project() {
+  project_id=$1
+  server_list=$(list_project_server $1)
+  for server in $(server_list |jq .[])
+  do
+    my_server=$(echo $server |jq .id |tr -d '"')
+    delete_server $my_server
+  done
+  curl -X DELETE -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects/$project_id"
+}
+
 
 deploy() {
   project_id=$(create_project |jq .id |tr -d '"')
