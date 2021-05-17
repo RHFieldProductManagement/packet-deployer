@@ -1,6 +1,6 @@
 # packet-deployer
 
-Deploy Field PM labs on Equinix Metal
+Creates a project with a baremetal instance and deploy Field PM labs on Equinix Metal
 
 ## Prerequisites
 
