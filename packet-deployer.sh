@@ -109,11 +109,11 @@ list_project_servers() {
 
 delete_project() {
   project_id=$1
-  server_list=$(list_project_server $1)
-  for server in $(server_list |jq .[])
+  server_list=$(list_project_servers $1 |jq .devices )
+  for server in $(echo "$server_list" |jq .[] |jq -r .id)
   do
-    my_server=$(echo $server |jq .id |tr -d '"')
-    delete_server $my_server
+    my_server=$(echo "$server")
+    delete_server $server
   done
   curl -X DELETE -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects/$project_id"
 }
@@ -158,10 +158,24 @@ case $1 in
         deploy
         echo "Server IP : $SERVER_IP"
         echo "Lab documentation : https://github.com/RHFieldProductManagement/openshift-virt-labs"
-        echo "Create proxy on localhost:8080 with command : ssh user@$SERVER_IP -L 8080:192.168.123.100:3128"
+        echo "Create proxy on localhost:8080 with command : ssh root@$SERVER_IP -L 8080:192.168.123.100:3128"
         echo "Then setup proxy and connect to lab instructions : https://cnv-workbook.apps.cnv.example.com "
         ;;
-  [Cc][Ll][Ee][Aa][Nn]*) delete_project $2 ;;
+  [Cc][Ll][Ee][Aa][Nn]*)
+        if [ -f node-infos.txt ]
+        then
+          source ./node-infos.txt
+          delete_project $PROJECT_ID
+          rm -f ./node-infos.txt
+        else
+          if [ "$2" = "" ]
+          then
+            echo "Please specify the project ID to cleanup"
+            exit 0
+          fi
+          delete_project $2
+        fi
+        ;;
   *) echo "Usage : $0 [ Deploy | Clean <project_id> ]"
     echo "Usage : $0 deploy ipi <- allows deployment to use IPI, WARNING : doubles deploy time"
     exit 0 ;;
