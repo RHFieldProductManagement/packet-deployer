@@ -163,5 +163,6 @@ case $1 in
         ;;
   [Cc][Ll][Ee][Aa][Nn]*) delete_project $2 ;;
   *) echo "Usage : $0 [ Deploy | Clean <project_id> ]"
+    echo "Usage : $0 deploy ipi <- allows deployment to use IPI, WARNING : doubles deploy time"
     exit 0 ;;
 esac
