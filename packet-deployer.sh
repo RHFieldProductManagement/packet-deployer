@@ -19,6 +19,10 @@ PLAN_SPOT="m3.large.x86"
 # Set your pull secret
 PULL_SECRET=''
 
+################################################################################
+###################### DO NOT EDIT BEYOND THIS LINE ############################
+################################################################################
+
 create_project_with_payment() {
   curl -X POST -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects" \
   -d '{
@@ -146,7 +150,8 @@ case $1 in
         echo "Server IP : $SERVER_IP"
         echo "Lab documentation : https://github.com/RHFieldProductManagement/openshift-virt-labs"
         echo "Create proxy on localhost:8080 with command : ssh user@$SERVER_IP -L 8080:192.168.123.100:3128"
-        echo "Then setup proxy and connect to lab instructions : https://cnv-workbook.apps.cnv.example.com" ;;
+        echo "Then setup proxy and connect to lab instructions : https://cnv-workbook.apps.cnv.example.com "
+        ;;
   [Cc][Ll][Ee][Aa][Nn]*) delete_project $2 ;;
   *) echo "Usage : $0 [ Deploy | Clean <project_id> ]"
     exit 0 ;;
