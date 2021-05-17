@@ -14,10 +14,13 @@ TERMINATION=$(date -d '+6 hours' +%FT%T%Z)
 
 # Set desired server types
 PLAN_ONDEMAND="s3.xlarge.x86"
-PLAN_SPOT="m3.large.x86"
+PLAN_SPOT="s3.xlarge.x86"
 
 # Set your pull secret
 PULL_SECRET=''
+
+# Server type : valid options are spot or ondemand
+SERVER_TYPE='spot'
 
 ################################################################################
 ###################### DO NOT EDIT BEYOND THIS LINE ############################
@@ -54,7 +57,7 @@ create_server_spot() {
   curl -X POST -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects/$project_id/devices" \
   -d '{
     "facility": "am6",
-    "plan": "'$PLAN_ONDEMAND'",
+    "plan": "'$PLAN_SPOT'",
     "hostname": "'$project_name'",
     "operating_system": "centos_8",
     "spot_instance": true,
@@ -63,7 +66,7 @@ create_server_spot() {
   }'
 }
 
-create_server() {
+create_server_ondemand() {
   curl -X POST -H "Content-Type: application/json" -H "X-Auth-Token: $API_TOKEN" "https://api.equinix.com/metal/v1/projects/$project_id/devices" \
   -d '{
     "facility": "am6",
@@ -122,8 +125,7 @@ delete_project() {
 deploy() {
   project_id=$(create_project |jq .id |tr -d '"')
   create_project_ssh_key
-#  SERVER_YAML=$(create_server_spot)
-  SERVER_ID=$(create_server_spot |jq .id |tr -d '"')
+  SERVER_ID=$(create_server_$SERVER_TYPE |jq .id |tr -d '"')
   SERVER_IP="null"
   while [ "$SERVER_IP" = "null" ]
   do
@@ -132,10 +134,16 @@ deploy() {
   done
   sleep 180
   SERVER_IP=$(get_server_ip $SERVER_ID |jq .ip_addresses[0].address |tr -d '"')
+  sed -i '/^'$SERVER_IP'/d' ~/.ssh/known_hosts
   echo $SERVER_IP
   echo "SERVER_IP=$SERVER_IP" > ./node-infos.txt
   echo "PROJECT_ID=$project_id" >> ./node-infos.txt
-  prepare_node_setup
+  if $USE_IPI
+  then
+    prepare_node_setup_ipi
+  else
+    prepare_node_setup
+  fi
   scp -o StrictHostKeyChecking=no node-prep.sh root@$SERVER_IP:/root/
   ssh -o StrictHostKeyChecking=no root@$SERVER_IP sh /root/node-prep.sh
   rm -f node-prep.sh
@@ -152,9 +160,13 @@ case $1 in
           exit 0
         elif [ "$PULL_SECRET" = "" ]
         then
-          echo "Please enter your pull secret in the script"
+          echo "Please enter your Openshift pull secret in the script"
           exit 0
         fi
+        case $2 in
+          [Ii][Pp][Ii]) USE_IPI=true ;;
+          *) USE_IPI=false ;;
+        esac
         deploy
         echo "Server IP : $SERVER_IP"
         echo "Lab documentation : https://github.com/RHFieldProductManagement/openshift-virt-labs"
@@ -167,6 +179,7 @@ case $1 in
           source ./node-infos.txt
           delete_project $PROJECT_ID
           rm -f ./node-infos.txt
+          PROJECT_ID=""
         else
           if [ "$2" = "" ]
           then
@@ -176,7 +189,8 @@ case $1 in
           delete_project $2
         fi
         ;;
-  *) echo "Usage : $0 [ Deploy | Clean <project_id> ]"
-    echo "Usage : $0 deploy ipi <- allows deployment to use IPI, WARNING : doubles deploy time"
-    exit 0 ;;
+  *)
+        echo "Usage : $0 [ Deploy | Clean <project_id> ]"
+        echo "Usage : $0 deploy ipi <- allows deployment to use IPI, WARNING : doubles deploy time"
+        exit 0 ;;
 esac
