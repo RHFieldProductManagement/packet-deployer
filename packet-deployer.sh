@@ -1,5 +1,6 @@
 #!/bin/bash
-#set -x
+# Equinix Metal Red Hat Field PM deployment script
+# Henry Geay de Montenon <hgeaydem@redhat.com>
 
 SSH_KEY=$(cat ~/.ssh/id_rsa.pub)
 
@@ -21,6 +22,9 @@ PULL_SECRET=''
 
 # Server type : valid options are spot or ondemand
 SERVER_TYPE='spot'
+
+# Max price to bid for spot server
+SPOT_BID_PRICE='0.70'
 
 ################################################################################
 ###################### DO NOT EDIT BEYOND THIS LINE ############################
@@ -61,7 +65,7 @@ create_server_spot() {
     "hostname": "'$project_name'",
     "operating_system": "centos_8",
     "spot_instance": true,
-    "spot_price_max": 0.70,
+    "spot_price_max": '$SPOT_BID_PRICE',
     "termination_time": "'$TERMINATION'"
   }'
 }
