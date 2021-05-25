@@ -26,6 +26,8 @@ SERVER_TYPE='spot'
 # Max price to bid for spot server
 SPOT_BID_PRICE='0.70'
 
+#valid choices are openshift-virt-labs and sno-edge-lab
+LAB_NAME="openshift-virt-labs"
 ################################################################################
 ###################### DO NOT EDIT BEYOND THIS LINE ############################
 ################################################################################
@@ -95,9 +97,9 @@ prepare_node_setup() {
   mount /dev/md0 /var/lib/libvirt/images
   mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
   echo /dev/md0 /var/lib/libvirt/images defaults,nofail,nobootwait 0 2 >> /etc/fstab
-  git clone https://github.com/RHFieldProductManagement/openshift-virt-labs.git
-  sed -i 's/^PULL_SECRET.*/PULL_SECRET='\''$PULL_SECRET'\''/g' openshift-virt-labs/install.sh
-  sed -i 's/^OCP_VERSION.*/OCP_VERSION=$OCP_VERSION/g' openshift-virt-labs/install.sh
+  git clone https://github.com/RHFieldProductManagement/$LAB_NAME.git
+  sed -i 's/^PULL_SECRET.*/PULL_SECRET='\''$PULL_SECRET'\''/g' $LAB_NAME/install.sh
+  sed -i 's/^OCP_VERSION.*/OCP_VERSION=$OCP_VERSION/g' $LAB_NAME/install.sh
 EOF
 }
 
@@ -152,7 +154,7 @@ deploy() {
   ssh -o StrictHostKeyChecking=no root@$SERVER_IP sh /root/node-prep.sh
   rm -f node-prep.sh
   sleep 10
-  ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd /root/openshift-virt-labs; sh install.sh"
+  ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd /root/$LAB_NAME; sh install.sh"
 }
 
 
@@ -173,7 +175,7 @@ case $1 in
         esac
         deploy
         echo "Server IP : $SERVER_IP"
-        echo "Lab documentation : https://github.com/RHFieldProductManagement/openshift-virt-labs"
+        echo "Lab documentation : https://github.com/RHFieldProductManagement/$LAB_NAME"
         echo "Create proxy on localhost:8080 with command : ssh root@$SERVER_IP -L 8080:192.168.123.100:3128"
         echo "Then setup proxy and connect to lab instructions : https://cnv-workbook.apps.cnv.example.com "
         ;;
