@@ -28,6 +28,9 @@ SPOT_BID_PRICE='0.70'
 
 #valid choices are openshift-virt-labs and sno-edge-lab
 LAB_NAME="openshift-virt-labs"
+
+#OCP Version
+OCP_VERSION="latest-4.7"
 ################################################################################
 ###################### DO NOT EDIT BEYOND THIS LINE ############################
 ################################################################################
